@@ -16,8 +16,8 @@ All of it is free tier except the Anthropic API.
 
 | Thing | Cost |
 |---|---|
-| **Anthropic API — scoring** (Haiku 4.5, $1/$5 per 1M tokens) | ~$0.02–0.03/night → **~$6–12/year** |
-| **Anthropic API — cover letters** (Sonnet 5, $2/$10 per 1M tokens) | ~$0.02–0.05 per letter → **~$10–15/year** at 5–10 letters/week |
+| **Anthropic API — scoring** (Haiku 4.5, $1/$5 per 1M tokens) | **~$0.02–0.03 per nightly run** |
+| **Anthropic API — cover letters** (Sonnet 5, $2/$10 per 1M tokens) | **~$0.10–0.25 per letter** |
 | **Anthropic API — style guide** (Sonnet 5, one-off) | **~$0.02 once** (or $0 if you write it by hand) |
 | **First-run backfill** (scoring ~650 existing listings once) | **~$0.50 once** |
 | Adzuna API | $0 (free tier; 2 calls/night) |
@@ -28,9 +28,9 @@ All of it is free tier except the Anthropic API.
 | GitHub Actions | $0 — this repo is private, so the GitHub Free plan's 2,000 min/month applies; the nightly run uses ~3 min × 30 = **~90 min/month**, about 4.5% of it |
 | GitHub Actions cache (for `jobs.db`) | $0 (10 GB limit; the db is a few MB) |
 
-**Realistic total: under $30/year**, essentially all of it Anthropic API.
-You'll need to load credit on the Anthropic console to start; the minimum
-top-up will cover you for a year or more.
+Essentially all the cost is the Anthropic API, paid per run: a few cents
+for each nightly scoring run, plus each letter you ask for. You'll need to
+load credit on the Anthropic console to start.
 
 Two things keep this cheap by design:
 
