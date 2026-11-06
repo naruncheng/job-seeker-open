@@ -30,7 +30,9 @@ All of it is free tier except the Anthropic API.
 
 Essentially all the cost is the Anthropic API, paid per run: a few cents
 for each nightly scoring run, plus each letter you ask for. You'll need to
-load credit on the Anthropic console to start.
+load credit on the Anthropic console to start: **$5 is all you need, and it
+should last you a while** (roughly a month of nightly runs plus 15 or more
+letters, or far longer if you only refresh when you're looking).
 
 Two things keep this cheap by design:
 

@@ -4,7 +4,8 @@
 
 1. Follow [`SETUP.md`](SETUP.md): install `uv`, run `uv sync --dev`, and copy
    `.env.example` to `.env` with your own API keys (at minimum
-   `ANTHROPIC_API_KEY`).
+   `ANTHROPIC_API_KEY`). Putting $5 of credit on your Anthropic account is
+   enough to start, and it should last you a while.
 2. Rewrite [`config/profile.md`](config/profile.md) about yourself: it's what
    every job is scored against.
 3. In [`config/settings.yaml`](config/settings.yaml), check the job search
