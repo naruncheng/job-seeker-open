@@ -1,0 +1,24 @@
+# Target company career pages, one entry per company.
+#
+# `ats` selects which ingest client handles this company:
+#   greenhouse | lever | ashby | workday | generic
+# `slug` is the board identifier used in that ATS's public API URL.
+#
+# Adding a company should be a one-line change here — no code changes needed
+# for any company on a supported ATS.
+#
+# Currently empty on purpose: the aggregators (Adzuna, JobSpy) cover the
+# search for now. To add a company, replace `[]` below with a list, e.g.:
+#
+# companies:
+#   - name: Some Robotics Co
+#     ats: greenhouse        # careers URL: job-boards.greenhouse.io/<slug>/...
+#     slug: somerobotics
+#   - name: Another Co
+#     ats: lever             # jobs.lever.co/<slug>/...
+#     slug: anotherco
+#   - name: Third Co
+#     ats: ashby             # jobs.ashbyhq.com/<slug>/...
+#     slug: thirdco
+
+companies: []

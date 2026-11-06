@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% macro score_badge(value) -%}
+  {%- if value is none -%}<span class="score none" title="Not scored yet">–</span>
+  {%- else -%}<span class="score {{ 'hi' if value >= 8 else 'mid' if value >= 6 else '' }}">{{ value }}</span>
+  {%- endif -%}
+{%- endmacro %}
+{% block content %}
+<div class="card">
+  <div class="row">
+    <div class="grow">
+      <strong>{{ all_count }}</strong> jobs saved on this PC.
+      <span class="muted small">
+        {% if last_ingest %}Last refreshed {{ last_ingest | date }}.{% else %}Never refreshed on this PC.{% endif %}
+      </span>
+    </div>
+    <form method="post" action="{{ url_for('ingest') }}" data-busy="Fetching… (~1–2 min)">
+      <button type="submit" title="Pull the latest listings from Adzuna, LinkedIn and Indeed into this PC's database">Refresh jobs</button>
+    </form>
+    <form method="post" action="{{ url_for('score') }}" data-busy="Scoring…">
+      <button type="submit" title="Score jobs that don't have a score yet against config/profile.md (costs a few cents)">Score new jobs</button>
+    </form>
+    <a class="btn primary" href="{{ url_for('add') }}">Add a job</a>
+  </div>
+</div>
+
+<form class="card row" method="get" action="{{ url_for('jobs_list') }}">
+  <input class="grow" type="search" name="q" value="{{ filters.q }}" placeholder="Search title, company or location">
+  <select name="min" aria-label="Minimum score">
+    <option value="" {{ 'selected' if not filters.min }}>Any score</option>
+    {% for n in (5, 6, 7, 8, 9) %}
+      <option value="{{ n }}" {{ 'selected' if filters.min == n|string }}>Score ≥ {{ n }}</option>
+    {% endfor %}
+  </select>
+  <select name="source" aria-label="Source">
+    <option value="">All sources</option>
+    {% for s in sources %}
+      <option value="{{ s }}" {{ 'selected' if filters.source == s }}>{{ 'Added by me' if s == 'manual' else s|capitalize }}</option>
+    {% endfor %}
+  </select>
+  <select name="sort" aria-label="Sort">
+    {% for key, label in sorts.items() %}
+      <option value="{{ key }}" {{ 'selected' if filters.sort == key }}>Sort: {{ label }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit">Filter</button>
+</form>
+
+<div class="card">
+  <p class="muted small" style="margin-top:0">{{ total }} matching job{{ '' if total == 1 else 's' }}.</p>
+  {% if rows %}
+  <div class="tablewrap">
+  <table>
+    <thead><tr>
+      <th>Score</th><th>Job</th><th class="hide-sm">Location</th><th class="hide-sm">Seen</th><th>Letter</th>
+    </tr></thead>
+    <tbody>
+    {% for job in rows %}
+      <tr>
+        <td>{{ score_badge(job.relevance) }}</td>
+        <td>
+          <a href="{{ url_for('job_detail', job_id=job.job_id) }}"><strong>{{ job.title }}</strong></a><br>
+          <span class="muted">{{ job.company }}</span>
+          {% if job.source == 'manual' %}<span class="tag">added by me</span>{% endif %}
+          {% if job.reason %}<div class="small muted">{{ job.reason }}</div>{% endif %}
+        </td>
+        <td class="hide-sm small">{{ job.location_raw or '' }}</td>
+        <td class="hide-sm small muted">{{ job.first_seen_at | date }}</td>
+        <td>{% if job.job_id in lettered %}<a href="{{ url_for('job_detail', job_id=job.job_id) }}#letter">✓ Ready</a>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% if pages > 1 %}
+  <div class="row" style="margin-top:12px">
+    {% if page > 1 %}<a class="btn" href="{{ url_for('jobs_list', page=page-1, **filters) }}">← Prev</a>{% endif %}
+    <span class="muted small">Page {{ page }} of {{ pages }}</span>
+    {% if page < pages %}<a class="btn" href="{{ url_for('jobs_list', page=page+1, **filters) }}">Next →</a>{% endif %}
+  </div>
+  {% endif %}
+  {% else %}
+    <p>No jobs match. {% if not all_count %}Click <strong>Refresh jobs</strong> to pull the latest listings.{% endif %}</p>
+  {% endif %}
+</div>
+{% endblock %}

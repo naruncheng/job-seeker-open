@@ -1,0 +1,53 @@
+name: Nightly ingest + digest
+
+on:
+  schedule:
+    # 19:17 UTC = 05:17 AEST / 06:17 AEDT next day. Deliberately not on the
+    # hour: GitHub queues scheduled workflows globally and :00 is by far the
+    # most contended slot, so on-the-hour runs get delayed (or occasionally
+    # dropped) more often than odd-minute ones.
+    - cron: "17 19 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install dependencies
+        run: uv sync --dev
+
+      - name: Restore jobs.db (so dedupe persists across nightly runs)
+        uses: actions/cache@v4
+        with:
+          path: data/jobs.db
+          key: jobs-db-${{ github.run_id }}
+          restore-keys: |
+            jobs-db-
+
+      - name: Ingest
+        env:
+          ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
+          ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
+          USER_AGENT_EMAIL: ${{ secrets.USER_AGENT_EMAIL }}
+        run: uv run jobs ingest
+
+      - name: Score
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: uv run jobs score
+
+      - name: Send digest (Discord + email)
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          DIGEST_TO_EMAIL: ${{ secrets.DIGEST_TO_EMAIL }}
+          DIGEST_FROM_EMAIL: ${{ secrets.DIGEST_FROM_EMAIL }}
+        run: uv run jobs digest

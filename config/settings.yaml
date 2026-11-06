@@ -1,0 +1,56 @@
+# Pipeline thresholds, schedule, and delivery preferences.
+
+scoring:
+  # Minimum relevance score (0-10) for a job to be included in the digest.
+  threshold: 7
+  # Number of jobs sent to the LLM per scoring call.
+  batch_size: 10
+  # Hard cap on estimated LLM spend (USD) for a single pipeline run.
+  budget_cap_usd: 1.00
+
+rate_limit:
+  # Minimum seconds between requests to the same domain.
+  min_delay_seconds: 2.0
+  # Hard cap on requests per source per run.
+  max_requests_per_source: 200
+
+digest:
+  # Delivery channels to use, in order. Both run every night once configured.
+  channels: [discord, email]
+  groups: [local, domestic, international]
+  local_city: Melbourne
+  local_country: Australia
+
+ingest:
+  # Sources enabled for `jobs ingest`. A source missing required credentials
+  # degrades gracefully and is skipped, not fatal.
+  sources: [adzuna, jobspy, greenhouse, lever, ashby]
+  adzuna:
+    country: au
+    what: "graduate mechanical OR graduate engineer OR mechatronics OR robotics OR automation engineer OR industrial design OR product design"
+    where: "Melbourne"
+    results_per_page: 50
+    max_pages: 2
+  jobspy:
+    site_names: [indeed, linkedin]
+    search_term: "graduate mechanical OR graduate engineer OR mechatronics OR robotics OR automation engineer OR industrial design OR product design"
+    location: "Melbourne, Australia"
+    results_wanted: 30
+    hours_old: 72
+
+letters:
+  # Your full name: written into each .docx's Author / Last modified by fields
+  # (File > Properties). Fill this in, or Word shows a blank author.
+  author_name: ""
+  # Every letter invites the reader to see more of your work here, e.g.
+  # "https://yourname.com/". Leave blank if you don't have a portfolio.
+  portfolio_url: ""
+  # Generic sentences the letter writer must not use (it rewrites a draft that
+  # still contains one). Add the stock lines YOU reuse in every letter — the
+  # style guide (`jobs style-guide`) lists them under "Recurring phrasing".
+  # Matching ignores case and punctuation.
+  avoid_phrases:
+    - "a strong foundation in"
+    - "I'm confident in my ability to adapt quickly"
+    - "a leading company like"
+    - "practical industry experience"

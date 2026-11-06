@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}{{ job.title }} — {{ job.company }}{% endblock %}
+{% block content %}
+<p class="small"><a href="{{ url_for('jobs_list') }}">← All jobs</a></p>
+
+<div class="card">
+  <h1 style="margin:0 0 4px;font-size:22px">{{ job.title }}</h1>
+  <div class="muted">{{ job.company }}{% if job.location_raw %} · {{ job.location_raw }}{% endif %}</div>
+  <div class="row small" style="margin-top:10px">
+    {% if job.relevance is not none %}
+      <span class="score {{ 'hi' if job.relevance >= 8 else 'mid' if job.relevance >= 6 else '' }}">{{ job.relevance }}</span>
+    {% else %}<span class="score none">–</span><span class="muted">not scored</span>{% endif %}
+    {% if job.industry %}<span class="tag">{{ job.industry }}</span>{% endif %}
+    {% if job.role_type %}<span class="tag">{{ job.role_type }}</span>{% endif %}
+    {% if job.deadline %}<span><strong>Closes {{ job.deadline | date }}</strong></span>{% endif %}
+    <span class="muted">ID {{ job.job_id }}</span>
+  </div>
+  {% if job.reason %}<p style="margin-bottom:0">{{ job.reason }}</p>{% endif %}
+  {% if job.visa_flag %}<p class="small muted" style="margin-bottom:0">Visa: {{ job.visa_flag }}</p>{% endif %}
+  {% if job.url.startswith(('http://', 'https://')) %}
+  <p style="margin-bottom:0"><a class="btn" href="{{ job.url }}" target="_blank" rel="noopener noreferrer">Open the ad ↗</a></p>
+  {% endif %}
+</div>
+
+<div class="card" id="letter">
+  <h2 style="margin-top:0;font-size:18px">Cover letter</h2>
+  {% if letter_paragraphs %}
+    <div class="letter" id="letter-text">
+      {% for p in letter_paragraphs %}<p>{{ p }}</p>{% endfor %}
+    </div>
+    <div class="row">
+      <button type="button" id="copy-letter">Copy text</button>
+      <a class="btn primary" href="{{ url_for('download_letter', job_id=job.job_id, ext='docx') }}">Download .docx</a>
+      <a class="btn" href="{{ url_for('download_letter', job_id=job.job_id, ext='md') }}">Download .md</a>
+    </div>
+    <hr style="border:none;border-top:1px solid var(--border);margin:18px 0">
+  {% else %}
+    <p class="muted">No letter yet.</p>
+  {% endif %}
+
+  {% if truncated %}
+    <div class="flash error">Only the start of this ad was saved (the source cuts it off), so a letter would miss most of the requirements. Paste the full ad below first.</div>
+  {% endif %}
+  <form method="post" action="{{ url_for('make_letter', job_id=job.job_id) }}" data-busy="Writing and fact-checking… (~1 min)">
+    <details {{ 'open' if truncated or not job.description }}>
+      <summary class="small">Paste the full ad text {{ '(recommended)' if truncated else '(optional — replaces the saved one)' }}</summary>
+      <textarea name="description" placeholder="Open the ad, select all the description text, copy, and paste it here."></textarea>
+    </details>
+    <p style="margin-bottom:0">
+      <button class="primary" type="submit">{{ 'Write a new version' if letter_paragraphs else 'Write cover letter' }}</button>
+      <span class="small muted">Tailored to the ad, then fact-checked against your resume. Takes about a minute and costs 10–25 cents.</span>
+    </p>
+  </form>
+</div>
+
+<div class="card">
+  <details {{ 'open' if not letter_paragraphs }}>
+    <summary><strong>Saved job ad</strong> <span class="small muted">({{ (job.description or '')|length }} characters)</span></summary>
+    <pre class="jd" style="margin-top:10px">{{ job.description | plain or 'No description saved.' }}</pre>
+  </details>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  var copyBtn = document.getElementById("copy-letter");
+  if (copyBtn) {
+    copyBtn.addEventListener("click", function () {
+      var paras = Array.from(document.querySelectorAll("#letter-text p")).map(function (p) { return p.innerText; });
+      navigator.clipboard.writeText(paras.join("\n\n")).then(function () {
+        copyBtn.textContent = "Copied ✓";
+        setTimeout(function () { copyBtn.textContent = "Copy text"; }, 1500);
+      });
+    });
+  }
+</script>
+{% endblock %}

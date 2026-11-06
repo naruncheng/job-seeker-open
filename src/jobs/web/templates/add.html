@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Add a job — Job Seeker{% endblock %}
+{% block content %}
+<div class="card" style="max-width:760px">
+  <h1 style="margin-top:0;font-size:22px">Add a job you found yourself</h1>
+  <p class="muted" style="margin-top:0">For listings the nightly search didn't pick up — a company site, a LinkedIn post, a referral.</p>
+  <form method="post" action="{{ url_for('add') }}" data-busy="Saving…">
+    <div class="row">
+      <div class="grow"><label for="title">Job title</label><input id="title" name="title" value="{{ form.title }}" style="width:100%" required></div>
+      <div class="grow"><label for="company">Company</label><input id="company" name="company" value="{{ form.company }}" style="width:100%" required></div>
+    </div>
+    <label for="url">Link to the ad</label>
+    <input id="url" name="url" type="url" value="{{ form.url }}" style="width:100%" required placeholder="https://…">
+    <label for="location">Location <span class="muted small">(optional)</span></label>
+    <input id="location" name="location" value="{{ form.location }}" style="width:100%" placeholder="Melbourne, VIC">
+    <label for="description">Job ad text</label>
+    <textarea id="description" name="description" {{ 'autofocus' if focus_description }}
+      placeholder="Paste the ad here (select the description on the page, Ctrl+C, Ctrl+V).&#10;&#10;Leave empty to try reading it from the link — works for most company career pages, not for LinkedIn, Indeed or SEEK.">{{ form.description }}</textarea>
+    <p style="margin-bottom:0"><button class="primary" type="submit">Save job</button></p>
+  </form>
+</div>
+{% endblock %}

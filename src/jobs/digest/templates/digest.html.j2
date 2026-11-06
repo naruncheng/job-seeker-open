@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body { margin: 0; padding: 0; background: #f2f4f7; font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; color: #1f2933; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 24px 12px; }
+  .header { background: #1f2933; color: #fff; border-radius: 10px; padding: 22px 24px; }
+  .header .date { margin: 0 0 6px 0; color: #9aa5b1; font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+  .datebar { margin: 0 0 8px 2px; color: #52606d; font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+  .header h1 { margin: 0 0 4px 0; font-size: 20px; font-weight: 700; }
+  .header .sub { color: #cbd2d9; font-size: 14px; }
+  .pill { display: inline-block; margin: 12px 6px 0 0; padding: 3px 10px; border-radius: 999px; background: #3e4c59; color: #fff; font-size: 12px; }
+  .scope { margin: 30px 0 4px 0; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #52606d; }
+  .scope .count { color: #9aa5b1; font-weight: 600; }
+  .group { margin: 16px 0 6px 2px; font-size: 12px; font-weight: 600; color: #7b8794; }
+  .card { background: #fff; border-radius: 8px; border-left: 5px solid #3498db; padding: 14px 16px; margin: 0 0 10px 0; box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+  .card.excellent { border-left-color: #2ecc71; }
+  .card.good { border-left-color: #3498db; }
+  .card.borderline { border-left-color: #f1c40f; }
+  .card table { width: 100%; border-collapse: collapse; }
+  .title { font-size: 16px; font-weight: 700; line-height: 1.3; }
+  .title a { color: #102a43; text-decoration: none; }
+  .title a:hover { text-decoration: underline; }
+  .company { margin-top: 3px; font-size: 13px; color: #52606d; }
+  .company strong { color: #323f4b; }
+  .score { display: inline-block; min-width: 38px; text-align: center; padding: 3px 8px; border-radius: 6px; font-size: 13px; font-weight: 700; color: #fff; white-space: nowrap; }
+  .score-excellent { background: #27ae60; }
+  .score-good { background: #2f86c9; }
+  .score-borderline { background: #f1c40f; color: #3d3200; }
+  .reason { margin: 10px 0 0 0; font-size: 14px; line-height: 1.5; color: #323f4b; }
+  .chips { margin-top: 10px; }
+  .chip { display: inline-block; margin: 0 6px 4px 0; padding: 2px 8px; border-radius: 4px; background: #eef1f5; color: #3e4c59; font-size: 12px; }
+  .chip.deadline { background: #fdecea; color: #a3281f; }
+  .chip.visa { background: #fff6dd; color: #7a5a00; }
+  .foot { margin-top: 10px; padding-top: 8px; border-top: 1px solid #edf0f4; font-size: 12px; color: #9aa5b1; }
+  .foot code { background: #f2f4f7; padding: 1px 5px; border-radius: 3px; color: #3e4c59; font-size: 12px; }
+  .foot a { color: #2f86c9; text-decoration: none; font-weight: 600; }
+  .empty { background: #fff; border-radius: 10px; padding: 28px 24px; margin-top: 16px; }
+  .empty h2 { margin: 0 0 8px 0; font-size: 18px; }
+  .empty p { margin: 0; color: #52606d; line-height: 1.5; }
+  .footer { margin-top: 28px; padding: 0 4px; color: #9aa5b1; font-size: 12px; line-height: 1.6; }
+  .footer .degraded { color: #a3281f; }
+</style>
+</head>
+<body>
+<div class="wrap">
+{% if grouped %}
+  <div class="header">
+    {% if run_date %}<div class="date">{{ run_date }}</div>{% endif %}
+    <h1>Job digest</h1>
+    <div class="sub">{{ total_count }} job{{ "s" if total_count != 1 else "" }} above threshold tonight</div>
+    {% for scope in grouped %}<span class="pill">{{ scope_labels.get(scope, scope.title()) }} &middot; {{ scope_counts[scope] }}</span>{% endfor %}
+  </div>
+
+  {% for scope, industries in grouped.items() %}
+  <div class="scope">{{ scope_labels.get(scope, scope.title()) }} <span class="count">({{ scope_counts[scope] }})</span></div>
+  {% for industry, role_types in industries.items() %}
+    {% for role_type, jobs in role_types.items() %}
+    <div class="group">{{ industry }} &middot; {{ role_type }}</div>
+    {% for job in jobs %}
+    <div class="card {{ score_band(job.relevance) }}">
+      <table role="presentation">
+        <tr>
+          <td>
+            <div class="title"><a href="{{ job.url }}">{{ job.title }}</a></div>
+            <div class="company"><strong>{{ job.company }}</strong>{% if job.location_raw %} &middot; {{ job.location_raw }}{% endif %}{% set posted = format_date(job.posted_at) %}{% if posted %} &middot; Posted {{ posted }}{% endif %}</div>
+          </td>
+          <td style="width: 56px; text-align: right; vertical-align: top;">
+            <span class="score score-{{ score_band(job.relevance) }}">{{ job.relevance }}/10</span>
+          </td>
+        </tr>
+      </table>
+      {% if job.reason %}<p class="reason">{{ job.reason }}</p>{% endif %}
+      {% if job.deadline or job.visa_flag %}
+      <div class="chips">
+        {% if job.deadline %}<span class="chip deadline">Closes {{ format_date(job.deadline) or job.deadline }}</span>{% endif %}
+        {% if job.visa_flag %}<span class="chip visa">Visa: {{ job.visa_flag }}</span>{% endif %}
+      </div>
+      {% endif %}
+      <div class="foot">id: <code>{{ job.job_id }}</code> &middot; source: {{ job.source }} &middot; <a href="{{ job.url }}">View listing &rarr;</a></div>
+    </div>
+    {% endfor %}
+    {% endfor %}
+  {% endfor %}
+  {% endfor %}
+{% else %}
+  {% if run_date %}<div class="datebar">{{ run_date }}</div>{% endif %}
+  <div class="empty">
+    <h2>Nothing new today</h2>
+    <p>The pipeline ran and found no new listings meeting the relevance threshold. This message
+    confirms it's alive.</p>
+  </div>
+{% endif %}
+  <div class="footer">
+    {% if new_count is not none %}
+    <div>{{ new_count }} new listing{{ "s" if new_count != 1 else "" }} seen overnight
+    {%- if total_count %}, {{ total_count }} of them above threshold{% endif %}.</div>
+    {% endif %}
+    <div>Sources this run: {{ source_counts_desc }}{% if scoring_cost_desc %} &middot; Scoring cost: {{ scoring_cost_desc }}{% endif %}</div>
+    {% if degraded_sources %}
+    <div class="degraded">Degraded (failed, skipped): {{ degraded_sources|join(", ") }}</div>
+    {% endif %}
+  </div>
+</div>
+</body>
+</html>

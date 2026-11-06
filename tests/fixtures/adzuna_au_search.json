@@ -1,0 +1,37 @@
+{
+  "results": [
+    {
+      "id": "4909876543",
+      "title": "Graduate Mechatronics Engineer",
+      "company": { "display_name": "Acme Robotics" },
+      "location": {
+        "display_name": "Melbourne VIC",
+        "area": ["Australia", "Victoria", "Melbourne"]
+      },
+      "redirect_url": "https://www.adzuna.com.au/land/ad/4909876543",
+      "description": "Join our automation team building next-generation robotic arms...",
+      "salary_min": 65000.0,
+      "salary_max": 75000.0,
+      "created": "2026-09-15T04:12:00Z",
+      "category": { "label": "Engineering Jobs", "tag": "engineering-jobs" },
+      "contract_type": "permanent"
+    },
+    {
+      "id": "4909876544",
+      "title": "Automation Engineer",
+      "company": { "display_name": "Southbank Manufacturing" },
+      "location": {
+        "display_name": "Southbank VIC",
+        "area": ["Australia", "Victoria", "Southbank"]
+      },
+      "redirect_url": "https://www.adzuna.com.au/land/ad/4909876544",
+      "description": "We're looking for an automation engineer with PLC experience...",
+      "salary_min": null,
+      "salary_max": null,
+      "created": "2026-09-14T22:03:00Z",
+      "category": { "label": "Engineering Jobs", "tag": "engineering-jobs" },
+      "contract_type": "permanent"
+    }
+  ],
+  "count": 2
+}
